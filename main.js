@@ -45,7 +45,55 @@ window.onload = function(){
 		garl.frame =7;
 		giral.toX = girl.x;
 		giral.toY = girl.y;
-		girl.dir
+		girl.dir = DIR_DOWN;
+		girl.anim = [
+		15,16,17,16,//left
+		24,25,26,24,//right
+		33,34,35,34//top
+		6,7,8,7//Down
+		];
+
+		game.rootScene.addChild(girl);
+
+		//chara定期処理
+		girl.tick = 0;
+		girl.addEventListener(Event.ENTER_FRAME,function(){
+			//上へ
+			if (girl.y > girl.toY){
+				girl.dir = DIR_UP;
+				if(Math.abs(girl.y - girl.toY) < 3){
+					girl.y = girl.toY;
+				}else{
+					girl.y -= 3;
+				}
+				//下へ移動
+				else if (girl.y < girl.toY){
+					girl.dir = DIR_DOWN;
+					if (Math.abs(girl.y - girl.toY) < 3) {
+						girl.y = girl.toY;
+					}else {
+						girl.y += 3;
+					}
+				}
+				//右へ移動
+				else if (girl.x > girl.toX){
+					girl.dir = DIR_RIGHT;
+					if (Math.abs(girl.x - girl.toX;) < 3) {
+						girl.x = girl.toX;
+					} else {
+						girl.x += 3;
+					}
+				}
+
+				//フレームの指定
+				girl.tick++;
+				if(girl.x == girl.toX && girl.y == girl.toY) girl.tick = 1;//静止
+				girl.frame = girl.anim[girl.dir *4 + (girl.tick % 4)];
+
+			}
+
+
+		})
 
 
 
