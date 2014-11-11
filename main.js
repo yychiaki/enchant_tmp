@@ -8,34 +8,118 @@ var gs = {
 	,fps:15
 };
 
+var BackGround = Class.create(Sprite,{
+	initialize:function(){
+		Sprite.call(this,game.width,game.height);
+		this.backgroundColor = "rgb(0,200,255)";
+		this.image = this.createImage();
+		game.rootScene.addChild(this);
+	},
+	createImage:function(){
+		var maptip = game.assets['http://enchantjs.com/assets/images/map0.gif'];
+		var image = new Surface(320, 320);
+		var size = 16;
+		for (var i = 0; i < game.width; i += size) {
+			image.draw(
+				maptip, 7 * size, 0  //image, x, y
+						, 16, 16  //sx,sy
+						, i, 320 - size //dx ,dy
+						, size, size //dw, dh
+						);
+		}
+		return image;
+	}
+
+});
+var eMap = Class.create(Map,{
+	initialize:function(){
+		Map.call(this,16,16);
+		this.image = game.assets['http://enchantjs.com/assets/images/map0.gif'];
+		this.loadData(this.create(20,20,7));
+		game.rootScene.addChild(this);
+	},
+	create:function(rownum,colnum,value){
+		var rows = [];
+		var empty = -1;
+		for (var i = 0; i < rownum -1; i++){
+			rows.push(line(colnum,empty));
+		};
+		rows.push(line(colnum,value));
+		return rows;
+		function line(colnum,value){
+			var cols = [];
+			for (var i = 0; i < colnum; i++){
+				cols.push(value);
+			};
+			return cols;
+		}
+	}
+});
+
+var ePad = Class.create(Pad,{
+	initialize:function(){
+		Pad.call(this);
+		this.moveTo(0,220);
+		game.rootScene.addChild(this);
+	}
+});
 var Bear = Class.create(Sprite,{
-    initialize:function(){
-        Sprite.call(this,32,32);
-        this.image = game.assets['http://enchantjs.com/assets/images/chara1.gif'];
-        this.x = (game.width - this.width) / 2;
-        this.y = game.height - this.height -16;
-        this.status = STATUS_WAIT;
-        this.frame =[10,11,10,12];
-        game.rootScene.addChild(this);
-    },
-    onenterframe:function(){
-        if (game.input.right) {
-            this.scaleX = 1;
-            this.x += 5;
-            if(this.x + this.width > game.width) {
-                this.x = game.width - this.width;
-                
+	initialize:function(){
+		Sprite.call(this,32,32);
+		this.image = game.assets['http://enchantjs.com/assets/images/chara1.gif'];
+		this.x = (game.width - this.width) / 2;
+		this.y = game.height - this.height -16;
+		this.status = STATUS_WAIT;
+		this.anim =[10,11,10,12];
+		this.frame =[10];
+		game.rootScene.addChild(this);
+	},
+	onenterframe:function(){
+		if(game.input.left){
+			this.x -= 3;
+			this.scaleX = -1;
+			if(this.x < 0) {
+				this.x = 0;
+			}
+			if (this.status != STATUS_JUMP) {
+				this.status = STATUS_WAIT;
+			}
+		}else if (game.input.right){
+			this.x +=3;
+			this.scaleX = 1;
+			if(this.x + this.width > game.width) {
+				this.x = game.width - this.width;
+
+			}
+			if (this.status != STATUS_JUMP) {
+				this.status = STATUS_WAIT;
+			}
+		}
+		if(this.status != STATUS_JUMP){
+			this.status = STATUS_WAIT;
+			if (game.input.up){
+				this.status = STATUS_JUMP;
+				this.age = 0;
+			}
+		}
+		if(this.status === STATUS_JUMP){
+			if (this.age < 8){
+				this.y -= 8;
+			} else if (this.age < 16){
+				this.y += 8;
+			} else {
+				this.status = STATUS_WAIT;
+			}
+		}
+
+		if (this.status == STATUS_WAIT) {
+                this.frame = this.anim[0];            
+            } else if (this.status == STATUS_WALK) {
+                this.frame = this.anim;            
+            } else if (this.status == STATUS_JUMP) {
+                this.frame = this.anim[1];            
             }
-        }
-        if(game.input.left) {
-            this.scaleX = -1;
-            this.x -= 5;
-            if(this.x < 0) {
-                this.x = 0;
-                
-            }
-        }
-    }
+	}
 });
 
 var STATUS_WAIT = 0;
@@ -50,14 +134,17 @@ window.onload = function(){
 		'http://enchantjs.com/assets/images/map0.gif');
 	
 	game.onload = function(){
-		//くまの生成
-        new Bear();
-        var pad = new Pad();
-        pad.moveTo(0,220);
-        game.rootScene.addChild(pad);
-    };
+		// new BackGround();
+		new eMap();
+		new Bear();
+		new ePad();
 
-    game.start();
+
+
+
+	};
+
+	game.start();
 };
 
 /*
