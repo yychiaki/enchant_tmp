@@ -24,19 +24,26 @@ var Pit = Class.create(Sprite,{
 			case 0:
 			this.frame++;
 			if(this.frame > 4 - 1){
-				this.changeMode(1,100);
+				this.changeMode(1,30);
 			}
 			break;
 			case 1:
 			this.frame--;
 			if (this.frame < 1){
-				this.changeMode(0,100);
+				this.changeMode(0,200);
+				maxDroid--;
+				if (--maxDroid < 1){
+					this.mode = 3;
+				}
 			}
 			break;
 			case 2:
 			if (game.frame > this.waitFor) {
 				this.mode = this.nextMode;
 			}
+			break;
+			case 3:
+			break;
 		}
 	},
 	changeMode:function(nextmode,random){
@@ -58,20 +65,49 @@ var Pit = Class.create(Sprite,{
 		}
 		if(this.frame > 2-1){
 			this.frame = 5;
-			this.changeMode(1,10);
+			this.nextmode = 1;
+			this.waitFor = game.frame + 10;
+			score.add(1);
 		}
 	}
 });
 
+var Score = Class.create(Label,{
+	initialize:function(x,y) {
+		Label.call(this);
+		this.x = x || 5;
+		this.y = y || 5;
+		this.text = "SCORE:0";
+		this.font = "16px bold serif";
+		this.score = 0;
+	},
+	add:function(point) {
+		this.score += point;
+		this.text = "SCORE:" + this.score;
+	}
+});
+
+var score;
+var maxDroid = 30;
 window.onload = function(){
 	game = new Core(gs.width,gs.height);
 	game.fps = gs.fps;
 	game.preload('./assets/images/mogura.png');
-	game.onload = function(){
-		var pit = new Pit(100,100);
-		game.rootScene.addChild(pit);
+	game.onload = function() {
 
+		score = new Score();
+		game.rootScene.addChild(score);
+		var offset = {x:40,y:40};
+		var size = 50;
+		var split = 5;
 
+		for(var i = 0; i < split * split; i++){
+			var pit = new Pit(
+				size * (i % split) + offset.x
+				,size * ~~(i / split) + offset.y
+				);
+			game.rootScene.addChild(pit);
+		}
 	};
 	game.start();
 };
