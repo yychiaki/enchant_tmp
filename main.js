@@ -8,104 +8,63 @@ var gs = {
 	,fps:15
 };
 
-var Shoot = Class.create(Sprite,{
-	initialize:function(x,y,direction){
-		Sprite.call(this,16,16);
-		this.image = game.assets['graphic.png'];
-		this.x = x;
-		this.y = y;
-		this.frame = 1;
-		this.direction = direction;
-		this.moveSpeed = 10;
+
+
+var Bear = Class.create(Sprite,{
+	initialize:function(x,y){
+		Sprite.call(this,32,32);
+		this.image = game.assets['http://enchantjs.com/assets/images/chara1.gif'];
+		this.anime = [0,1,2,1];
+		this.frame = [5,6,5,7];
+		this.y = x || 0;
+		this.x = y || 0;
+		this.tl
+		.moveTo((gs.width-this.width), 10, 130)
+		.moveTo(-(gs.width-this.width), 10, 30)
+		.loop();
 		game.rootScene.addChild(this);
 	},
-	onenterframe:function(){
-		this.x += this.moveSpeed * Math.cos(this.direction);
-		this.y += this.moveSpeed * Math.sin(this.direction);
-		if(this.y > 320 
-			|| this.x > 320 
-			|| this.x < -this.width 
-			|| this.y < -this.height){this.remove();}
+	movedown:function() {
+		this.moveBy(0,this.height);
 	},
-remove: function(){
-	game.rootScene.removeChild(this);
-	delete this;
-}
-});
-var Player = Class.create(Sprite,{
-	initialize:function(x,y) {
-		Sprite.call(this,16,16);
-		this.image = game.assets['graphic.png'];
-		this.x = x;
-		this.y = y;
-
-		game.rootScene.on('touchstart',function(e){
-			player.y = e.y;
-			game.touched = true;
-		});
-		game.rootScene.on('touchend',function(e){
-			player.y = e.y;
-			game.touched = false;
-		});
-		game.rootScene.on('touchmove',function(e){
-			player.y = e.y;
-			game.touched = true;
-		});
-
-
-		game.rootScene.addChild(this)
+	isRange:function(){
+		return (
+			this.x > 0 
+			&& this.x < game.width -this.width
+			);
 	},
-	onenterframe:function(){
-		if(game.touched && game.frame % 3 ===0){
-			new Shoot(this.x,this.y,0);
+	turn:function() {
+		this.scaleX *= -1;
+	},
+	move:function(){
+		if(Math.floor(this.age / 15) % 2 == 0){
+			this.x += 0.5;
+			this.y += 0.2
+		}else{
+			this.x -= 0.5;
+			this.y += 0.2
 		}
-	}
-
-});
-
-var Enemy = Class.create(Sprite,{
-	initialize:function(x, y, omega) {
-		Sprite.call(this,16,16);
-		this.image = game.assets['graphic.png'];
-		this.x = x;
-		this.y = y;
-		this.frame = 3;
-		this.time = 0;
-
-		this.omega = omega * (Math.PI / 180);
-		this.direction = 0;
-		this.moveSpeed =3;
-		game.rootScene.addChild(this);
+		// var vector = 3 * this.scaleX;
+		// this.moveBy(vector,0);
 	},
 	onenterframe:function(){
-		this.direction += this.omega;
-		this.x -= this.moveSpeed * Math.cos(this.direction);
-		this.y += this.moveSpeed * Math.sin(this.direction);
-
-		if(this.y > 320 
-			|| this.x > 320
-			|| this.x < -this.width
-			|| this.y < -this.height
-			){
-			this.remove();
-		}
+		// this.move();
+		// if(!this.isRange()){
+		// 	this.turn();
+		// 	// this.movedown();
+		// }
+	},
+	ontouchstart:function(){
+		this.turn();
 	}
 });
 
-
-var player;
-var enemy;
 window.onload = function(){
 	game = new Core(gs.width,gs.height);
+	game.preload('http://enchantjs.com/assets/images/chara1.gif');
 	game.fps = gs.fps;
-	game.preload('graphic.png');
-	game.touched = false;
-	game.score = 0;
 	game.onload = function(){
-
-		player = new Player(0,152);
-		enemy = new Enemy(300,152,-1)
-
+		new Bear();
 	};
 	
 	game.start();
